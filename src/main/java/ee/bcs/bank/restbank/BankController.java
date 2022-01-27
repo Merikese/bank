@@ -44,6 +44,11 @@ public class BankController {
     public RequestResult addNewTransaction(@RequestBody TransactionDto transactionDto) {
         return transactionService.addNewTransaction(bank, transactionDto);
     }
+    @PostMapping("/receive/money")
+    public RequestResult receiveNewTransaction(@RequestBody TransactionDto transactionDto){
+        return transactionService.receiveNewTransaction(bank, transactionDto);
+
+    }
 
 
     // TODO: Et lisada uus account, loo uus controlleri endpoint                    /new/account
