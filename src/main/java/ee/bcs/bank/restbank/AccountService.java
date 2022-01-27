@@ -76,7 +76,6 @@ public class AccountService {
 
             return null;
         }
-
         AccountDto account = getAccountById(accounts, accountId);
         account.setFirstName(accountDto.getFirstName());
         account.setLastName(accountDto.getLastName());
@@ -88,4 +87,20 @@ public class AccountService {
 
     }
 
+    public RequestResult deleteAccount(List<AccountDto> accounts, int accountId) {
+        RequestResult requestResult = new RequestResult();
+
+        if (!accountIdExists(accounts, accountId)) {
+            requestResult.setError(" Account Id: " + accountId + "does not exist");
+
+            return null;
+        }
+
+        AccountDto account = getAccountById(accounts, accountId);
+        accounts.remove(account);
+        requestResult.setMessage("Account deleted");
+        requestResult.setAccountId(accountId);
+        return requestResult;
+
+    }
 }
