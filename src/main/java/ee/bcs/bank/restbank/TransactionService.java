@@ -87,10 +87,6 @@ public class TransactionService {
                 requestResult.setMessage("Successfully added 'new account' transaction ");
                 return requestResult;
 
-            default:
-                requestResult.setError("Unknown transaction type " + transactionType);
-                return requestResult;
-
             case DEPOSIT:
                 //arvutame uue balanci
                 newBalance = balance + amount;
@@ -145,7 +141,7 @@ public class TransactionService {
                 requestResult.setMessage("Successfully sent money ");
 
                 //teeme SAAJA transaktsiooni
-              receiverAccountNumber = transactionDto.getReceiverAccountNumber();
+                receiverAccountNumber = transactionDto.getReceiverAccountNumber();
 
                 //kontrollime kas saaja kontonumber eksisteerib meie andmebaasis(bank)
                 if (accountService.accountNumberExists(accounts, receiverAccountNumber)) {
@@ -167,49 +163,54 @@ public class TransactionService {
                 }
                 return requestResult;
 
-            case RECEIVE_MONEY:
-                receiverAccountNumber = transactionDto.getReceiverAccountNumber();
-                if (!accountService.accountNumberExists(accounts, receiverAccountNumber)) {
-                    requestResult.setError("No such account number exists" + receiverAccountNumber);
-                    return requestResult;
-
-                }
-
-                AccountDto receiveraccount = accountService.getAccountById(accounts, accountId);
-                balance =account.getBalance();
-
-                //arvutame uue balanc'i
-                newBalance = balance + amount;
-
-                // täidame transactionDto
-                transactionDto.setSenderAccountNumber(ATM);
-                transactionDto.setReceiverAccountNumber(account.getAccountNumber());
-                transactionDto.setBalance(newBalance);
-                transactionDto.setLocalDateTime(LocalDateTime.now());
-                transactionDto.setId(transactionId);
-
-                //Lisame tehingu transactionite alla (pluss inkrementeerime)
-                bank.addTransactionToTransactions(transactionDto);
-                bank.incrementTransactionId();
-
-                //uuendame konto balancit
-                account.setBalance(newBalance);
-
-                // valmistame result objekti
-                requestResult.setTransactionId(transactionId);
-                requestResult.setAccountId(accountId);
-                requestResult.setMessage("Successfully added 'new account' transaction ");
+            default:
+                requestResult.setError("unknown transaction" + transactionType);
                 return requestResult;
+
         }
 
     }
-    // TODO:    createTransactionForNewAccount()
-    //  account number
-    //  balance 0
-    //  amount 0
-    //  transactionType 'n'
-    //  receiver jääb null
-    //  sender jääb null
+
+    public RequestResult receiveNewTransaction(Bank bank, TransactionDto transactionDto) {
+        RequestResult requestResult = new RequestResult();
+        String receiverAccountNumber = transactionDto.getReceiverAccountNumber();
+        List<AccountDto> accounts = bank.getAccounts();
+
+        if(!accountService.accountNumberExists(accounts, receiverAccountNumber)) {
+            requestResult.setError("No such account (" + receiverAccountNumber + ") in our bank, try SEB");
+            return requestResult;
+        }
+
+        AccountDto receiverAccount = accountService.getAccountByNumber(bank.getAccounts(), receiverAccountNumber);
+        int transactionId = bank.getTransactionIdCount();
+
+        int receiverNewBalance = receiverAccount.getBalance() + transactionDto.getAmount();
+
+        transactionDto.setTransactionType(RECEIVE_MONEY);
+        transactionDto.setBalance(receiverNewBalance);
+        transactionDto.setId(transactionId);
+        transactionDto.setId(receiverAccount.getId());
+        transactionDto.setLocalDateTime(LocalDateTime.now());
+
+        bank.addTransactionToTransactions(transactionDto);
+        bank.incrementTransactionId();
+
+        receiverAccount.setBalance(receiverNewBalance);
+        requestResult.setTransactionId(transactionId);
+        requestResult.setMessage("Transaction received");
 
 
-}
+        return requestResult;
+
+
+        }
+        // TODO:    createTransactionForNewAccount()
+        //  account number
+        //  balance 0
+        //  amount 0
+        //  transactionType 'n'
+        //  receiver jääb null
+        //  sender jääb null
+
+
+    }
