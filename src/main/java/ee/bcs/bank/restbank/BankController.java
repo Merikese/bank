@@ -53,17 +53,29 @@ public class BankController {
 
     @PutMapping("/update/owner")
     public RequestResult updateOwnerDetails(@RequestBody AccountDto accountDto) {
-
         return accountService.updateOwnerDetails(bank.getAccounts(), accountDto);
     }
-    //todo endpoint, millega saab kontot lukustada/avada. kontrollige ka ID olemasolu
+
     @DeleteMapping ("/delete/account")
     public RequestResult deleteAccount (@RequestParam int accountId) {
         return accountService.deleteAccount(bank.getAccounts(), accountId);
+
     }
+    //tee endpoint, millega saab kontot lukustada/avada. kontrollige ka ID olemasolu
+
+    @PutMapping("/lock/account")
+    public RequestResult lockUnlockAccount(@RequestParam int accountId) {
+        return accountService.lockUnlockAccount(bank.getAccounts(), accountId);
+
+    }    //tee endpoint, millega saab kontot lukustada/avada. kontrollige ka ID olemasolu
+
+//todo: Loo endpoint /bankstatement/by/lastname
 
 
-    // TODO: Et lisada uus account, loo uus controlleri endpoint                    /new/account
+
+
+
+    // Et lisada uus account, loo uus controlleri endpoint                    /new/account
     //  võta RequestBodyst sisse accountDto objekt
     //  loo bankService alla uus teenus                                             addAccountToBank()
     //  ja lisa see konto bank accounts listi
