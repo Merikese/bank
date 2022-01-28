@@ -36,7 +36,7 @@ public class AccountService {
     }
 
     public AccountDto getAccountById(List<AccountDto> accounts, int accountId) {
-        //käime läbi kõik kontord accounts listis, ja paneme iga konto muutujasse 'account'
+        //käime läbi kõik kontod accounts listis, ja paneme iga konto muutujasse 'account'
         for (AccountDto account : accounts) {
             //kui leiame konto, mille id on võrdne accountId-ga
             if (account.getId() == accountId) {
@@ -73,8 +73,9 @@ public class AccountService {
         int accountId = accountDto.getId();
         if (!accountIdExists(accounts, accountId)) {
             requestResult.setError(" Account Id: " + accountId + "does not exist");
+            requestResult.setAccountId(accountId);
 
-            return null;
+            return requestResult;
         }
         AccountDto account = getAccountById(accounts, accountId);
         account.setFirstName(accountDto.getFirstName());
@@ -93,7 +94,7 @@ public class AccountService {
         if (!accountIdExists(accounts, accountId)) {
             requestResult.setError(" Account Id: " + accountId + "does not exist");
 
-            return null;
+            return requestResult;
         }
 
         AccountDto account = getAccountById(accounts, accountId);
@@ -103,4 +104,29 @@ public class AccountService {
         return requestResult;
 
     }
+
+    public RequestResult lockUnlockAccount(List<AccountDto> accounts, int accountId) {
+        RequestResult requestResult = new RequestResult();
+        if (!accountIdExists(accounts, accountId)) {
+            requestResult.setError("Account ID: " + accountId + " does not exist");
+            requestResult.setAccountId(accountId);
+            return requestResult;
+
+        }
+        AccountDto account = getAccountById(accounts, accountId);
+        if (account.getLocked()) { //  kui on lukus,
+            account.setLocked(false); //siis tee lahti
+            requestResult.setAccountId(accountId);//account Id added to msg
+            requestResult.setMessage("Account unlocked: " + accountId); // add to msg account unlocked
+
+            return requestResult;
+        }
+        account.setLocked(true);// when previous if did not get through - kui eelmine if ei läinud läbi- hüppas üle siia
+        requestResult.setAccountId (accountId);
+        requestResult.setMessage("Account is locked: " + accountId);
+
+        return requestResult;
+
+    }
+
 }
